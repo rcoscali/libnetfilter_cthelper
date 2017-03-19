@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 	nfct_helper_attr_set_u16(nfct_helper, NFCTH_ATTR_PROTO_L3NUM, AF_INET);
 	nfct_helper_attr_set_u8(nfct_helper, NFCTH_ATTR_PROTO_L4NUM, IPPROTO_TCP);
 
+	/* Will be freed by nfct_helper_free. */
 	p = nfct_helper_policy_alloc();
 	if (p == NULL) {
 		perror("OOM");
@@ -49,7 +50,6 @@ int main(int argc, char *argv[])
 	nfct_helper_nlmsg_build_payload(nlh, nfct_helper);
 
 	nfct_helper_free(nfct_helper);
-	nfct_helper_policy_free(p);
 
 	nl = mnl_socket_open(NETLINK_NETFILTER);
 	if (nl == NULL) {
