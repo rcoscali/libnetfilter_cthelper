@@ -497,12 +497,12 @@ nfct_helper_nlmsg_build_hdr(char *buf, uint8_t cmd,
 }
 
 static void
-nfct_helper_nlmsg_build_policy(struct nlmsghdr *nlh,
+nfct_helper_nlmsg_build_policy(struct nlmsghdr *nlh, uint16_t type,
 				struct nfct_helper_policy *p)
 {
 	struct nlattr *nest;
 
-	nest = mnl_attr_nest_start(nlh, NFCTH_POLICY_SET);
+	nest = mnl_attr_nest_start(nlh, type);
 	mnl_attr_put_strz(nlh, NFCTH_POLICY_NAME, p->name);
 	mnl_attr_put_u32(nlh, NFCTH_POLICY_EXPECT_MAX, htonl(p->expect_max));
 	mnl_attr_put_u32(nlh, NFCTH_POLICY_EXPECT_TIMEOUT,
@@ -549,22 +549,22 @@ nfct_helper_nlmsg_build_payload(struct nlmsghdr *nlh, struct nfct_helper *h)
 		int policy_set_num = 0;
 
 		if (h->bitset & (1 << NFCTH_ATTR_POLICY1)) {
-			nfct_helper_nlmsg_build_policy(nlh,
+			nfct_helper_nlmsg_build_policy(nlh, NFCTH_POLICY_SET1,
 							h->expect_policy[0]);
 			policy_set_num++;
 		}
 		if (h->bitset & (1 << NFCTH_ATTR_POLICY2)) {
-			nfct_helper_nlmsg_build_policy(nlh,
+			nfct_helper_nlmsg_build_policy(nlh, NFCTH_POLICY_SET2,
 							h->expect_policy[1]);
 			policy_set_num++;
 		}
 		if (h->bitset & (1 << NFCTH_ATTR_POLICY3)) {
-			nfct_helper_nlmsg_build_policy(nlh,
+			nfct_helper_nlmsg_build_policy(nlh, NFCTH_POLICY_SET3,
 							h->expect_policy[2]);
 			policy_set_num++;
 		}
 		if (h->bitset & (1 << NFCTH_ATTR_POLICY4)) {
-			nfct_helper_nlmsg_build_policy(nlh,
+			nfct_helper_nlmsg_build_policy(nlh, NFCTH_POLICY_SET4,
 							h->expect_policy[3]);
 			policy_set_num++;
 		}
@@ -717,14 +717,13 @@ nfct_helper_nlmsg_parse_policy_set(const struct nlattr *attr,
 				   struct nfct_helper *helper)
 {
 	struct nlattr *tb[NFCTH_POLICY_SET_MAX+1] = {};
-	int i;
+	int i, policy_num = 0;
 
 	mnl_attr_parse_nested(attr, nfct_helper_nlmsg_parse_policy_set_cb, tb);
-	if (tb[NFCTH_POLICY_SET_NUM]) {
-		helper->policy_num =
-			ntohl(mnl_attr_get_u32(tb[NFCTH_POLICY_SET_NUM]));
-	}
-	for (i=0; i<helper->policy_num; i++) {
+	if (tb[NFCTH_POLICY_SET_NUM])
+		policy_num = ntohl(mnl_attr_get_u32(tb[NFCTH_POLICY_SET_NUM]));
+
+	for (i=0; i<policy_num; i++) {
 		if (tb[NFCTH_POLICY_SET+i]) {
 			nfct_helper_nlmsg_parse_policy(tb[NFCTH_POLICY_SET+i],
 						       helper);
