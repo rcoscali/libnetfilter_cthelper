@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 	nfct_helper_attr_set_u32(nfct_helper, NFCTH_ATTR_QUEUE_NUM, atoi(argv[2]));
 	nfct_helper_attr_set_u16(nfct_helper, NFCTH_ATTR_PROTO_L3NUM, AF_INET);
 	nfct_helper_attr_set_u8(nfct_helper, NFCTH_ATTR_PROTO_L4NUM, IPPROTO_TCP);
+	nfct_helper_attr_set_u32(nfct_helper, NFCTH_ATTR_PRIV_DATA_LEN, 0);
 
 	/* Will be freed by nfct_helper_free. */
 	p = nfct_helper_policy_alloc();
